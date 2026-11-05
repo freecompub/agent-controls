@@ -1,0 +1,16 @@
+{
+  "agents": [
+    {
+      "file": "agents/lonely-agent.md",
+      "name": "lonely-agent",
+      "format": "claude",
+      "source_sha256": "<sha256>",
+      "declared_skills": []
+    }
+  ],
+  "skills": [
+    { "name": "orphan-skill", "file": "skills/orphan-skill/SKILL.md" }
+  ],
+  "mapping": [],
+  "orphan_skills": ["orphan-skill"]
+}

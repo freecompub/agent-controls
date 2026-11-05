@@ -63,6 +63,17 @@ Commence par `node <skill>/scripts/inspect_agent.mjs <agent.md>` : il extrait le
 - **Incohérences de la définition** : commandes demandées sans outil shell déclaré, écritures absentes des sorties déclarées. Signale-les : c'est à l'utilisateur de corriger l'agent.
 - **Exemples réels** : demande un exemple de chaque fichier lu ou produit par l'agent dont le format pourrait conditionner un contrôle (artefacts d'entrée, livrables, consigne de délégation, message d'arrêt). Range ceux qu'on te fournit dans `<agent>.controls/samples/`, sans données réelles ni secrets : ils serviront de base aux fixtures. Si un format est défini dans la définition de l'agent elle-même, cette définition suffit.
 
+**Entrée dossier (prototype).** Si l'entrée est un dossier contenant plusieurs agents et des
+skills, `node <skill>/scripts/inspect_folder.mjs <dossier>` scanne récursivement, inspecte
+chaque agent détecté (même logique qu'`inspect_agent.mjs`) et propose une matrice
+skill → agent(s) : un skill présent dans le dossier et déclaré par un agent est marqué couvert,
+un skill déclaré mais absent reste à lister dans `uncovered_sources`, un skill présent mais
+déclaré par aucun agent est signalé orphelin. **Cette matrice est une proposition, jamais une
+décision automatique : présente-la et attends la validation de l'utilisateur avant de
+poursuivre.** L'invariant « un agent, un contrat » reste vrai à cette étape : le script ne fait
+que de la découverte, il ne génère aucun contrat et ne modifie pas les phases 4 à 8, qui restent
+exécutées un agent à la fois.
+
 Si un outil est autorisé sans raison apparente, signale-le : réduire les permissions est souvent le contrôle le moins cher. C'est une suggestion ; la modification de l'agent revient à l'utilisateur.
 
 **Point d'arrêt.**

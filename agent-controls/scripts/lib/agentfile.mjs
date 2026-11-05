@@ -52,6 +52,33 @@ export function convertTools(tools, from, to) {
   return [...out];
 }
 
+/**
+ * Skills chargés par un agent : déclarés dans le frontmatter (clé « skills » à n'importe
+ * quel niveau) ou annoncés dans le prompt (section « Skills », mentions « load `x` »).
+ * Partagé entre inspect_agent.mjs (un agent) et inspect_folder.mjs (un dossier).
+ */
+export function collectDeclaredSkills(agent) {
+  const skills = new Set();
+  const collect = (node, inSkills) => {
+    if (Array.isArray(node)) node.forEach((x) => collect(x, inSkills));
+    else if (node && typeof node === 'object') Object.entries(node).forEach(([k, v]) => collect(v, k.toLowerCase() === 'skills'));
+    else if (inSkills && typeof node === 'string') skills.add(node.trim());
+  };
+  collect(agent.fm, false);
+  const body = agent.body || '';
+  let inSkillSection = false;
+  for (const line of body.split(/\r?\n/)) {
+    const h = /^#{1,6}\s+(.*)$/.exec(line);
+    if (h) { inSkillSection = /skill/i.test(h[1]); continue; }
+    const item = /^\s*[-*]\s+`([a-z0-9][a-z0-9<>_-]*)`/i.exec(line);
+    if (inSkillSection && item && !item[1].includes('/')) skills.add(item[1]);
+  }
+  for (const m of body.matchAll(/\bloads?\s+`([a-z0-9][a-z0-9-]*)`/gi)) skills.add(m[1]);
+  for (const m of body.matchAll(/\bloads?\s+([a-z0-9]+(?:-[a-z0-9]+)+)\s+skill\b/gi)) skills.add(m[1]);
+  for (const m of body.matchAll(/`([a-z0-9]+(?:-[a-z0-9<>]+)+)`\s+skill\b/gi)) skills.add(m[1]);
+  return [...skills];
+}
+
 /** Produit le fichier d'agent dans le format demandé. Le corps du prompt n'est jamais modifié. */
 export function renderAgent(agent, to, name, warnings) {
   const fm = { name, description: agent.fm.description ?? '' };

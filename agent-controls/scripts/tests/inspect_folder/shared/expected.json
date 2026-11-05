@@ -1,0 +1,25 @@
+{
+  "agents": [
+    {
+      "file": "agents/agent-a.md",
+      "name": "agent-a",
+      "format": "claude",
+      "source_sha256": "<sha256>",
+      "declared_skills": ["common-skill"]
+    },
+    {
+      "file": "agents/agent-b.md",
+      "name": "agent-b",
+      "format": "claude",
+      "source_sha256": "<sha256>",
+      "declared_skills": ["common-skill"]
+    }
+  ],
+  "skills": [
+    { "name": "common-skill", "file": "skills/common-skill/SKILL.md" }
+  ],
+  "mapping": [
+    { "skill": "common-skill", "agents": ["agent-a", "agent-b"], "present_in_folder": true, "shared": true }
+  ],
+  "orphan_skills": []
+}

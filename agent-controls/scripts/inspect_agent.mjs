@@ -4,7 +4,7 @@
 // Outils (et leur catégorie), entrées et sorties déclarées dans le frontmatter, transformées en globs proposés.
 // C'est un point de départ pour la fiche : l'analyse du prompt reste à faire.
 import path from 'node:path';
-import { readAgent } from './lib/agentfile.mjs';
+import { readAgent, collectDeclaredSkills } from './lib/agentfile.mjs';
 import { sha256File } from './lib/contract.mjs';
 import { toolCategory } from './runtime/lib/normalize.mjs';
 
@@ -30,26 +30,8 @@ const collect = (node, bucket) => {
 };
 collect(agent.fm, null);
 // Skills chargés : déclarés dans le frontmatter (clé « skills » à n'importe quel niveau) ou annoncés dans le prompt.
-const skills = new Set();
-const collectSkills = (node, inSkills) => {
-  if (Array.isArray(node)) node.forEach((x) => collectSkills(x, inSkills));
-  else if (node && typeof node === 'object') Object.entries(node).forEach(([k, v]) => collectSkills(v, k.toLowerCase() === 'skills'));
-  else if (inSkills && typeof node === 'string') skills.add(node.trim());
-};
-collectSkills(agent.fm, false);
 const body = agent.body || '';
-// Lignes de liste dans une section dont le titre parle de skills : « - `nom` »
-let inSkillSection = false;
-for (const line of body.split(/\r?\n/)) {
-  const h = /^#{1,6}\s+(.*)$/.exec(line);
-  if (h) { inSkillSection = /skill/i.test(h[1]); continue; }
-  const item = /^\s*[-*]\s+`([a-z0-9][a-z0-9<>_-]*)`/i.exec(line);
-  if (inSkillSection && item && !item[1].includes('/')) skills.add(item[1]);
-}
-// Mentions en ligne : « load `x` », « loads x skill », « `x` skill »
-for (const m of body.matchAll(/\bloads?\s+`([a-z0-9][a-z0-9-]*)`/gi)) skills.add(m[1]);
-for (const m of body.matchAll(/\bloads?\s+([a-z0-9]+(?:-[a-z0-9]+)+)\s+skill\b/gi)) skills.add(m[1]);
-for (const m of body.matchAll(/`([a-z0-9]+(?:-[a-z0-9<>]+)+)`\s+skill\b/gi)) skills.add(m[1]);
+const skills = new Set(collectDeclaredSkills(agent));
 
 // Incohérences mécaniques : commandes shell dans le prompt sans outil shell déclaré.
 const shellTools = tools.some((t) => t.category === 'shell.exec');

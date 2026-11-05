@@ -1,0 +1,39 @@
+{
+  "agents": [
+    {
+      "file": "agents/writer.md",
+      "name": "writer",
+      "format": "claude",
+      "source_sha256": "<sha256>",
+      "declared_skills": [
+        "bdd-methodology",
+        "missing-skill"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "bdd-methodology",
+      "file": "skills/bdd-methodology/SKILL.md"
+    }
+  ],
+  "mapping": [
+    {
+      "skill": "bdd-methodology",
+      "agents": [
+        "writer"
+      ],
+      "present_in_folder": true,
+      "shared": false
+    },
+    {
+      "skill": "missing-skill",
+      "agents": [
+        "writer"
+      ],
+      "present_in_folder": false,
+      "shared": false
+    }
+  ],
+  "orphan_skills": []
+}
