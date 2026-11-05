@@ -1,0 +1,9 @@
+{
+ "event": "PostToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": "tests/Insurance.UnitTest/Features/Pricing/PricingAcceptanceTests.cs",
+  "content": "using Xunit;\n\npublic class PricingAcceptanceTests\n{\n    // Young rider gets a motorcycle quote\n    [Fact]\n    public void Young_rider_gets_a_motorcycle_quote()\n    {\n        var result = new RequestQuote(new InMemoryQuotes()).Handle(new QuoteRequest(Age: 25, Vehicle: \"motorcycle\"));\n        Assert.Equal(480.50m, result.Premium);\n    }\n}\n"
+ }
+}

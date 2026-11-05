@@ -1,0 +1,8 @@
+{
+ "event": "PreToolUse",
+ "agent": "acceptance-designer",
+ "tool": "shell.exec",
+ "input": {
+  "command": "dotnet test --filter PricingAcceptanceTests"
+ }
+}

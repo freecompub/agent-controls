@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-controls/verdict.schema.json",
+  "title": "Verdict du reviewer",
+  "description": "Verdict écrit par un agent reviewer dans le verdict.json de son dossier. Le runtime recalcule le statut à partir des critères.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "dossier",
+    "criteria"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "answer",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^C[0-9]+$"
+          },
+          "answer": {
+            "enum": [
+              "yes",
+              "no",
+              "inconclusive"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "description": "Obligatoire et non vide quand answer vaut no (ce qui ne va pas) ou inconclusive (ce qui manque pour juger)",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "note"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "answer": {
+              "enum": [
+                "no",
+                "inconclusive"
+              ]
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "evidence": {
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "dossier": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "Jeton du dossier de revue : prouve que le verdict a été produit à partir de ce dossier"
+    }
+  }
+}

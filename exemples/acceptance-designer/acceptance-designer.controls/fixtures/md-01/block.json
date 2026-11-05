@@ -1,0 +1,9 @@
+{
+ "event": "PostToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": ".copilot-tracking/skraft-plans/insurance/details/2026-10-19/test-plan-s1.md",
+  "content": "# Test plan\n"
+ }
+}

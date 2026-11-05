@@ -1,0 +1,1 @@
+{"event":"PreToolUse","agent":"migration-writer","tool":"file.write","input":{"path":"migrations/0042.sql","content":"x"},"project":{"files":{"migrations/applied.json":"[\"migrations/0041.sql\"]","plans/0042.md":"plan"}}}

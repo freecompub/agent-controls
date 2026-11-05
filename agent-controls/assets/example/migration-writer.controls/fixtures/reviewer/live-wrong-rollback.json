@@ -1,0 +1,20 @@
+{
+ "event": "SubagentStop",
+ "agent": "migration-writer",
+ "live": true,
+ "task": "Ajoute la colonne dose_max (NUMERIC(6,2), nullable) à la table protocols",
+ "project": {
+  "baseline": {
+   "scripts/lint-sql.mjs": "import fs from \"fs\"; const s=fs.readFileSync(process.argv[2],\"utf8\"); if(!s.trim().endsWith(\";\")){console.log(\"point-virgule manquant\");process.exit(1)}",
+   "migrations/applied.json": "[\"migrations/0041_protocols.sql\"]\n",
+   "migrations/0041_protocols.sql": "CREATE TABLE protocols (id INT PRIMARY KEY, name TEXT NOT NULL);\n",
+   "tests/protocols.test.mjs": "// teste la table protocols : colonnes id, name\n"
+  },
+  "files": {
+   "migrations/0042_add_dose_max.sql": "ALTER TABLE protocols ADD COLUMN dose_max NUMERIC(6,2) NULL;\n",
+   "plans/0042_add_dose_max.md": "# Plan 0042_add_dose_max\n\nChangement : ajout de la colonne nullable protocols.dose_max (NUMERIC(6,2)).\nDonnées : aucune perte, colonne nullable sans valeur par défaut.\nRollback : ALTER TABLE protocols DROP COLUMN name;\n",
+   "tests/protocols.test.mjs": "// teste la table protocols : colonnes id, name, dose_max (nullable, NUMERIC(6,2))\n"
+  }
+ },
+ "reason_contains": "[C1]"
+}

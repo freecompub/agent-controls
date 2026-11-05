@@ -1,0 +1,949 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-controls/controls.schema.json",
+  "title": "Contrat de contrôles d'un agent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "agent",
+    "plugin",
+    "runtime",
+    "failure_modes",
+    "controls"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "definition",
+        "clients"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/slug"
+        },
+        "definition": {
+          "type": "string",
+          "description": "Chemin du fichier .md de l'agent fourni par l'utilisateur, relatif au contrat ; lu, jamais modifié"
+        },
+        "clients": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "claude-code",
+              "copilot-cli",
+              "copilot-vscode"
+            ]
+          }
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Empreinte du fichier agent au moment de l'analyse ; écrite par le skill"
+        }
+      }
+    },
+    "plugin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/slug",
+          "description": "Par défaut : le nom de l'agent"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "budget_ms",
+        "max_iterations"
+      ],
+      "properties": {
+        "budget_ms": {
+          "type": "object",
+          "description": "Budget de latence p95 par événement",
+          "additionalProperties": false,
+          "properties": {
+            "PreToolUse": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "PostToolUse": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "SubagentStop": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "Stop": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7,
+          "description": "Strictement inférieur au garde-fou de Copilot (8 blocages consécutifs)"
+        },
+        "logs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "retention_runs": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            },
+            "retention_days": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 14
+            }
+          }
+        }
+      }
+    },
+    "failure_modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "severity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^FM-[0-9]{2,}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/hookControl"
+      }
+    },
+    "reviewer": {
+      "$ref": "#/$defs/reviewer"
+    },
+    "blocked_exit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "patterns"
+      ],
+      "description": "Arrêt légitime de l'agent sans livrable (artefact manquant, contradiction). Reconnu sur son message final : la revue est alors sautée.",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Expressions régulières testées sur le message final de l'agent"
+        },
+        "require_no_changes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Une sortie bloquée ne doit avoir modifié aucun fichier du projet"
+        },
+        "check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "module",
+            "covers",
+            "fixtures"
+          ],
+          "description": "Vérifie qu'un arrêt bloqué est justifié (module custom recevant le message final)",
+          "properties": {
+            "module": {
+              "type": "string",
+              "pattern": "\\.mjs$"
+            },
+            "params": {
+              "type": "object"
+            },
+            "covers": {
+              "$ref": "#/$defs/fmRefs"
+            },
+            "fixtures": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/fixture"
+              }
+            }
+          }
+        },
+        "allowed_changes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Globs : fichiers qu'un arrêt bloqué peut avoir écrits (fichier de blocker, par exemple)"
+        }
+      }
+    },
+    "modes": {
+      "type": "array",
+      "description": "Variantes de comportement de l'agent, reconnues dans la consigne de délégation",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "task_pattern",
+          "disable"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/slug"
+          },
+          "task_pattern": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Expression régulière testée sur la consigne de délégation"
+          },
+          "disable": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^(CTRL-[A-Z0-9]+-[0-9]{2,}|C[0-9]+)$"
+            },
+            "description": "Contrôles et critères désactivés dans ce mode"
+          }
+        }
+      }
+    },
+    "deferred": {
+      "type": "array",
+      "description": "Contrôles déterministes envisagés mais reportés faute d'exemple du format concerné",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "covers",
+          "planned",
+          "needs"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DEF-[0-9]{2,}$"
+          },
+          "covers": {
+            "$ref": "#/$defs/fmRefs"
+          },
+          "planned": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Le hook envisagé"
+          },
+          "needs": {
+            "type": "string",
+            "minLength": 5,
+            "description": "L'exemple ou l'information qui manque"
+          }
+        }
+      }
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "description": "Rapport de run écrit dans le projet à chaque fin de subagent : interface de sortie vers l'orchestrateur",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Gabarit de chemin relatif au projet ; variables {agent}, {date}, {run}"
+        }
+      }
+    },
+    "uncovered_sources": {
+      "type": "array",
+      "description": "Sources de règles que l'agent utilise mais que l'utilisateur n'a pas fournies : leurs règles ne sont pas contrôlées",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind",
+          "impact"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "skill",
+              "reviewer",
+              "document"
+            ]
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 5,
+            "description": "Ce qui n'est pas contrôlé faute de cette source"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "fmRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^FM-[0-9]{2,}$"
+      }
+    },
+    "toolCategory": {
+      "description": "Catégorie abstraite, traduite par le générateur en noms d'outils propres à chaque client",
+      "enum": [
+        "file.read",
+        "file.write",
+        "shell.exec",
+        "web.fetch",
+        "subagent.spawn",
+        "mcp.call"
+      ]
+    },
+    "message": {
+      "type": "object",
+      "description": "Retour renvoyé à l'agent quand le contrôle bloque",
+      "additionalProperties": false,
+      "required": [
+        "problem",
+        "expected",
+        "action"
+      ],
+      "properties": {
+        "problem": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        }
+      }
+    },
+    "check": {
+      "description": "Contrôle prédéfini, ou module personnalisé pour les cas non couverts",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "patterns"
+          ],
+          "properties": {
+            "type": {
+              "const": "deny-path"
+            },
+            "patterns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "patterns"
+          ],
+          "properties": {
+            "type": {
+              "const": "allow-paths"
+            },
+            "patterns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "description": "Seuls ces chemins sont autorisés parmi ceux que vise match.paths"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "path"
+          ],
+          "properties": {
+            "type": {
+              "const": "require-file"
+            },
+            "path": {
+              "type": "string",
+              "description": "Gabarit, ex. plans/{basename}.md"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "patterns"
+          ],
+          "properties": {
+            "type": {
+              "const": "deny-command"
+            },
+            "patterns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "description": "Expression régulière"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "content"
+            },
+            "require": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Expressions qui doivent toutes apparaître dans le fichier"
+            },
+            "forbid": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Expressions qui ne doivent pas apparaître"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "patterns"
+          ],
+          "properties": {
+            "type": {
+              "const": "require-changed"
+            },
+            "patterns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "description": "Chaque motif doit correspondre à au moins un fichier"
+            },
+            "scope": {
+              "enum": [
+                "changed",
+                "present"
+              ],
+              "default": "changed",
+              "description": "changed : modifié depuis le début du run ; present : présent dans le projet"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "command"
+          ],
+          "properties": {
+            "type": {
+              "const": "run-command"
+            },
+            "command": {
+              "type": "string",
+              "description": "Commande dont un code de sortie non nul fait échouer le contrôle"
+            },
+            "timeout_ms": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "module"
+          ],
+          "properties": {
+            "type": {
+              "const": "custom"
+            },
+            "module": {
+              "type": "string",
+              "pattern": "\\.mjs$"
+            },
+            "params": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "schema"
+          ],
+          "properties": {
+            "type": {
+              "const": "schema"
+            },
+            "schema": {
+              "type": "string",
+              "pattern": "\\.json$",
+              "description": "JSON Schema relatif au contrat, embarqué dans le plugin"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "append-only"
+            },
+            "allow_changed": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Expressions : les lignes existantes qui y correspondent peuvent changer (en y correspondant toujours)"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "patterns"
+          ],
+          "properties": {
+            "type": {
+              "const": "allow-command"
+            },
+            "patterns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "description": "Expressions : seules les commandes dont la première ligne correspond sont permises ; tout enchaînement est refusé"
+            }
+          }
+        }
+      ]
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "input",
+        "expect"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/slug"
+        },
+        "input": {
+          "type": "string",
+          "description": "Payload normalisé, indépendant du client"
+        },
+        "expect": {
+          "enum": [
+            "allow",
+            "deny",
+            "block"
+          ]
+        }
+      }
+    },
+    "hookControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "covers",
+        "event",
+        "match",
+        "check",
+        "on_error",
+        "message",
+        "fixtures"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^CTRL-[A-Z0-9]+-[0-9]{2,}$"
+        },
+        "covers": {
+          "$ref": "#/$defs/fmRefs"
+        },
+        "event": {
+          "enum": [
+            "PreToolUse",
+            "PostToolUse",
+            "SubagentStop",
+            "Stop"
+          ]
+        },
+        "match": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tools": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/toolCategory"
+              }
+            },
+            "paths": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "check": {
+          "$ref": "#/$defs/check"
+        },
+        "on_error": {
+          "enum": [
+            "block",
+            "allow"
+          ]
+        },
+        "message": {
+          "$ref": "#/$defs/message"
+        },
+        "fixtures": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/fixture"
+          }
+        },
+        "only_in_modes": {
+          "$ref": "#/$defs/modeRefs"
+        }
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tools",
+        "timeout_ms",
+        "inputs",
+        "criteria",
+        "fixtures"
+      ],
+      "properties": {
+        "model": {
+          "description": "Modèle du reviewer, idéalement différent de celui de l'agent. Une chaîne vaut pour tous les clients ; un objet donne un identifiant par client, puisqu'ils diffèrent.",
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "minProperties": 1,
+              "properties": {
+                "claude": {
+                  "type": "string"
+                },
+                "copilot": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "tools": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "file.read"
+            ]
+          },
+          "description": "Lecture seule, imposé par le schéma"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "task",
+              "diff",
+              "artifacts",
+              "tool-facts"
+            ]
+          },
+          "contains": {
+            "const": "diff"
+          }
+        },
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "covers",
+              "question"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^C[0-9]+$"
+              },
+              "covers": {
+                "$ref": "#/$defs/fmRefs"
+              },
+              "question": {
+                "type": "string",
+                "description": "Question fermée, réponse oui ou non"
+              },
+              "only_in_modes": {
+                "$ref": "#/$defs/modeRefs"
+              },
+              "severity": {
+                "enum": [
+                  "blocker",
+                  "high",
+                  "medium",
+                  "low"
+                ],
+                "default": "high",
+                "description": "Gravité d'un « non » ; seules les sévérités listées dans block_on bloquent"
+              },
+              "lens": {
+                "$ref": "#/$defs/slug",
+                "description": "Lentille qui évalue ce critère ; obligatoire si des lentilles sont déclarées"
+              }
+            }
+          }
+        },
+        "fixtures": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/fixture"
+          }
+        },
+        "lenses": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Groupes de critères évalués par des appels séparés au reviewer, chacun ne recevant que ses entrées",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/slug"
+              },
+              "inputs": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "task",
+                    "diff",
+                    "artifacts"
+                  ]
+                },
+                "description": "Entrées du run transmises à cette lentille (par défaut : celles du reviewer)"
+              },
+              "context": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Fichiers de référence du projet (globs) que cette lentille doit lire"
+              },
+              "access": {
+                "enum": [
+                  "listed",
+                  "project"
+                ],
+                "default": "listed",
+                "description": "listed : la lentille ne lit que ses entrées et son context ; project : elle peut aussi chercher dans tout le projet (lecture seule)"
+              }
+            }
+          }
+        },
+        "context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fichiers de référence (globs) quand il n'y a pas de lentilles"
+        },
+        "block_on": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "blocker",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "default": [
+            "blocker",
+            "high",
+            "medium"
+          ],
+          "description": "Sévérités qui bloquent la fin de l'agent ; les autres sont consignées comme observations"
+        },
+        "on_inconclusive": {
+          "enum": [
+            "block",
+            "escalate",
+            "observe"
+          ],
+          "default": "escalate",
+          "description": "Que faire d'une réponse « inconclusive » (éléments insuffisants pour juger) : bloquer l'agent, escalader vers un humain, ou consigner"
+        },
+        "knowledge": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Document relatif au contrat, embarqué dans le plugin et inclus dans le prompt"
+              },
+              "lenses": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/slug"
+                },
+                "description": "Lentilles qui le reçoivent (toutes par défaut)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "modeRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/slug"
+      }
+    }
+  }
+}

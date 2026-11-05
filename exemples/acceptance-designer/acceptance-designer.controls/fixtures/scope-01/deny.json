@@ -1,0 +1,9 @@
+{
+ "event": "PreToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": "README.md",
+  "content": "x"
+ }
+}

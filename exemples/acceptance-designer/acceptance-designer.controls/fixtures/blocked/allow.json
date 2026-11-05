@@ -1,0 +1,13 @@
+{
+ "event": "SubagentStop",
+ "agent": "acceptance-designer",
+ "task": "Distill story s1",
+ "project": {
+  "baseline": {
+   "docs/adr/decisions-index.md": "# ADR\n"
+  },
+  "files": {}
+ },
+ "final_message": "{\n  \"status\": \"blocked\",\n  \"type\": \"missing_artefact\",\n  \"message\": \"Required artefact not found\",\n  \"context\": {\n    \"missing\": [\n      \".copilot-tracking/skraft-plans/insurance/plans/2026-10-19/ac-draft-s1.md\"\n    ],\n    \"phase_required_by\": \"DISTILL\"\n  }\n}",
+ "expect_status": "blocked"
+}

@@ -1,0 +1,9 @@
+{
+ "event": "PostToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": "src/Insurance.Application/RequestQuote.cs",
+  "content": "public class RequestQuote { public RequestQuote(IQuotes q) {} public QuoteResult Handle(QuoteRequest r) => new QuoteResult(0m); }\n"
+ }
+}

@@ -1,0 +1,9 @@
+{
+ "event": "PreToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": ".copilot-tracking/skraft-plans/insurance/plans/2026-10-19/ac-draft-s1.md",
+  "content": "x"
+ }
+}

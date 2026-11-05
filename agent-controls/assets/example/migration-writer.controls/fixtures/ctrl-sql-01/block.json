@@ -1,0 +1,1 @@
+{"event":"PostToolUse","agent":"migration-writer","tool":"file.write","input":{"path":"migrations/0042.sql"},"project":{"files":{"scripts/lint-sql.mjs":"import fs from \"fs\"; const s=fs.readFileSync(process.argv[2],\"utf8\"); if(!s.trim().endsWith(\";\")){console.log(\"point-virgule manquant\");process.exit(1)}","migrations/0042.sql":"ALTER TABLE t ADD dose int"}}}

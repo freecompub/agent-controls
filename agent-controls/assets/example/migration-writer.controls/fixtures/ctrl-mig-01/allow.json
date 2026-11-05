@@ -1,0 +1,1 @@
+{"event":"PreToolUse","agent":"migration-writer","tool":"file.write","input":{"path":"migrations/0042_dose.sql","content":"ALTER TABLE t ADD dose int;"},"project":{"files":{"plans/0042_dose.md":"# Plan\nRollback : DROP COLUMN dose."}}}

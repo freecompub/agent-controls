@@ -1,0 +1,142 @@
+# Exemple : contrat de contrôles d'un agent qui écrit des migrations de schéma
+version: 1
+
+agent:
+  name: migration-writer
+  definition: ../migration-writer.md
+  source_sha256: 2dc4b04f58e681e4eb559889c3730d7d535297613bd60f626d8f9c56a7ff7f74
+  clients: [claude-code, copilot-cli]
+
+plugin:
+  version: 0.1.0
+  description: Agent migration-writer avec ses contrôles (hooks + reviewer)
+
+runtime:
+  budget_ms:
+    PreToolUse: 100
+    PostToolUse: 2000
+    SubagentStop: 180000
+  max_iterations: 3
+  logs:
+    retention_runs: 50
+    retention_days: 14
+
+failure_modes:
+  - id: FM-01
+    description: Écrit une migration sans plan préalable ni stratégie de rollback
+    severity: critical
+  - id: FM-02
+    description: Modifie une migration déjà appliquée au lieu d'en créer une nouvelle
+    severity: critical
+  - id: FM-03
+    description: Exécute une commande destructive sur la base de données
+    severity: critical
+  - id: FM-04
+    description: Produit un SQL syntaxiquement invalide
+    severity: high
+  - id: FM-05
+    description: Migration non réversible ou rollback incohérent avec la migration
+    severity: high
+  - id: FM-06
+    description: Changement de schéma sans adaptation des tests concernés
+    severity: medium
+
+controls:
+  - id: CTRL-MIG-01
+    covers: [FM-01]
+    event: PreToolUse
+    match:
+      tools: [file.write]
+      paths: ["migrations/**/*.sql"]
+    check:
+      type: require-file
+      path: "plans/{basename}.md"
+    on_error: block
+    message:
+      problem: Migration écrite sans plan.
+      expected: Un fichier plans/{basename}.md décrivant le changement et le rollback.
+      action: Crée le plan, puis réécris la migration.
+    fixtures:
+      - { name: deny-without-plan, input: fixtures/ctrl-mig-01/deny.json, expect: deny }
+      - { name: allow-with-plan, input: fixtures/ctrl-mig-01/allow.json, expect: allow }
+
+  - id: CTRL-MIG-02
+    covers: [FM-02]
+    event: PreToolUse
+    match:
+      tools: [file.write]
+      paths: ["migrations/**/*.sql"]
+    check:
+      type: custom
+      module: checks/deny-applied-migration.mjs
+      params: { registry: migrations/applied.json }
+    on_error: block
+    message:
+      problem: Cette migration est déjà appliquée.
+      expected: Une nouvelle migration, jamais la modification d'une existante.
+      action: Annule la modification et crée une migration suivante.
+    fixtures:
+      - { name: deny-applied, input: fixtures/ctrl-mig-02/deny.json, expect: deny }
+      - { name: allow-new, input: fixtures/ctrl-mig-02/allow.json, expect: allow }
+
+  - id: CTRL-DB-01
+    covers: [FM-03]
+    event: PreToolUse
+    match:
+      tools: [shell.exec]
+    check:
+      type: deny-command
+      patterns:
+        - "(?i)\\bdrop\\s+(table|database|schema)\\b"
+        - "(?i)\\btruncate\\b"
+        - "(?i)prisma\\s+migrate\\s+reset"
+    on_error: block
+    message:
+      problem: Commande destructive sur la base de données.
+      expected: Aucune commande destructive exécutée par l'agent.
+      action: Écris la migration ; son application relève d'un humain.
+    fixtures:
+      - { name: deny-drop, input: fixtures/ctrl-db-01/deny.json, expect: deny }
+      - { name: allow-status, input: fixtures/ctrl-db-01/allow.json, expect: allow }
+
+  - id: CTRL-SQL-01
+    covers: [FM-04]
+    event: PostToolUse
+    match:
+      tools: [file.write]
+      paths: ["migrations/**/*.sql"]
+    check:
+      type: run-command
+      command: "node scripts/lint-sql.mjs {path}"
+      timeout_ms: 1500
+    on_error: allow
+    message:
+      problem: Le SQL ne passe pas le lint.
+      expected: Un fichier SQL valide.
+      action: Corrige les erreurs signalées par le lint.
+    fixtures:
+      - { name: block-invalid, input: fixtures/ctrl-sql-01/block.json, expect: block }
+      - { name: allow-valid, input: fixtures/ctrl-sql-01/allow.json, expect: allow }
+
+reviewer:
+  model: claude-sonnet-5-5
+  tools: [file.read]
+  timeout_ms: 150000
+  inputs: [task, diff, artifacts]
+  criteria:
+    - id: C1
+      covers: [FM-05]
+      question: Le rollback décrit dans le plan annule-t-il exactement chaque changement de la migration ?
+    - id: C2
+      covers: [FM-05]
+      question: La migration est-elle applicable sans perte de données sur une base non vide ?
+    - id: C3
+      covers: [FM-06]
+      severity: low
+      question: Chaque table ou colonne modifiée est-elle couverte par au moins un test mis à jour ?
+  fixtures:
+    - { name: block-missing-rollback, input: fixtures/reviewer/block.json, expect: block }
+    - { name: allow-complete, input: fixtures/reviewer/allow.json, expect: allow }
+    - { name: allow-low-observation, input: fixtures/reviewer/low.json, expect: allow }
+    - { name: live-good, input: fixtures/reviewer/live-good.json, expect: allow }
+    - { name: live-wrong-rollback, input: fixtures/reviewer/live-wrong-rollback.json, expect: block }

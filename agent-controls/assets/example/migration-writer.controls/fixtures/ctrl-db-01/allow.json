@@ -1,0 +1,1 @@
+{"event":"PreToolUse","agent":"migration-writer","tool":"shell.exec","input":{"command":"npx prisma migrate status"}}

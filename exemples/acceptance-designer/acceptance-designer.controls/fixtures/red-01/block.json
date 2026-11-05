@@ -1,0 +1,22 @@
+{
+ "event": "SubagentStop",
+ "agent": "acceptance-designer",
+ "task": "Distill story s1",
+ "project": {
+  "baseline": {
+   ".copilot-tracking/skraft-plans/insurance/plans/2026-10-19/stories-m1.md": "<!-- markdownlint-disable-file -->\n# Stories\n",
+   ".copilot-tracking/skraft-plans/insurance/plans/2026-10-19/ac-draft-s1.md": "<!-- markdownlint-disable-file -->\n# AC\n",
+   "docs/adr/decisions-index.md": "# ADR\n"
+  },
+  "files": {
+   ".copilot-tracking/skraft-plans/insurance/features/pricing-motorcycle.feature": "Feature: Motorcycle insurance eligibility\n\n  @happy-path\n  Scenario: Young rider gets a motorcycle quote\n    Given a rider aged 25\n    When the rider requests a quote for a \"motorcycle\"\n    Then the quote is accepted with a premium of 480.50\n\n  @error-case\n  Scenario: Under-age rider is refused\n    Given a rider aged 21\n    When the rider requests a quote for a \"motorcycle\"\n    Then the quote is refused with reason \"MINIMUM_AGE\"\n",
+   ".copilot-tracking/skraft-plans/insurance/details/2026-10-19/test-plan-s1.md": "<!-- markdownlint-disable-file -->\n# Test plan\n",
+   ".copilot-tracking/skraft-plans/insurance/details/2026-10-19/impl-plan-s1.md": "<!-- markdownlint-disable-file -->\n# Impl plan\n",
+   "tests/Insurance.UnitTest/Features/Pricing/PricingAcceptanceTests.cs": "using Xunit;\n\npublic class PricingAcceptanceTests\n{\n    // Young rider gets a motorcycle quote\n    [Fact]\n    public void Young_rider_gets_a_motorcycle_quote()\n    {\n        var result = new RequestQuote(new InMemoryQuotes()).Handle(new QuoteRequest(Age: 25, Vehicle: \"motorcycle\"));\n        Assert.Equal(480.50m, result.Premium);\n    }\n}\n",
+   "src/Insurance.Application/RequestQuote.cs": "public class RequestQuote { public RequestQuote(IQuotes q) {} public QuoteResult Handle(QuoteRequest r) => new QuoteResult(0m); }\n",
+   ".copilot-tracking/skraft-plans/insurance/evidence/2026-10-19/s1/acceptance-red.stdout": "Assert.Equal() Failure\nExpected: 480.50\nActual:   0\nFailed: 1, Passed: 0\n",
+   ".copilot-tracking/skraft-plans/insurance/evidence/2026-10-19/s1/acceptance-red.exit": "0\n",
+   ".copilot-tracking/skraft-plans/insurance/evidence/2026-10-19/s1/acceptance-red.rev": "3f2a9c1d8e7b6a5f4e3d2c1b0a9f8e7d6c5b4a39\n"
+  }
+ }
+}

@@ -1,0 +1,800 @@
+{
+  "version": 1,
+  "agent": {
+    "name": "acceptance-designer",
+    "clients": [
+      "claude-code",
+      "copilot-cli"
+    ],
+    "source_sha256": "b40991c572a6afc6d127909260a2ac5e91b25021d249f505b6ee7c6d63353b5b"
+  },
+  "plugin": {
+    "name": "acceptance-designer",
+    "version": "0.5.0"
+  },
+  "runtime": {
+    "budget_ms": {
+      "PreToolUse": 150,
+      "PostToolUse": 1000,
+      "SubagentStop": 240000
+    },
+    "max_iterations": 3,
+    "logs": {
+      "retention_runs": 50,
+      "retention_days": 14
+    },
+    "hook_timeouts_s": {
+      "PreToolUse": 15,
+      "PostToolUse": 5,
+      "SubagentStop": 210,
+      "Stop": 5
+    }
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "severity": "high",
+      "description": "Écrit du comportement dans src/ au lieu de simples signatures pour faire compiler le test"
+    },
+    {
+      "id": "FM-02",
+      "severity": "high",
+      "description": "Écrit sous tests/ un fichier autre que le test d'acceptance (tests unitaires internes, utilitaires)"
+    },
+    {
+      "id": "FM-03",
+      "severity": "high",
+      "description": "Modifie un artefact amont : stories, ac-draft, contrats, event model, ADR, recherche"
+    },
+    {
+      "id": "FM-04",
+      "severity": "medium",
+      "description": "Écrit hors des zones déclarées (.copilot-tracking/skraft-plans, tests, src)"
+    },
+    {
+      "id": "FM-05",
+      "severity": "medium",
+      "description": "Place le test d'acceptance hors de tests/*.UnitTest/ (par exemple dans un projet IntegrationTest)"
+    },
+    {
+      "id": "FM-06",
+      "severity": "low",
+      "description": "Écrit un Markdown de plan sans l'en-tête markdownlint-disable-file"
+    },
+    {
+      "id": "FM-07",
+      "severity": "critical",
+      "description": "Exécute une commande Git d'écriture (commit, push, reset --hard, clean) ou une suppression récursive"
+    },
+    {
+      "id": "FM-08",
+      "severity": "medium",
+      "description": "Ajoute une dépendance au projet (installation de paquet)"
+    },
+    {
+      "id": "FM-09",
+      "severity": "high",
+      "description": "Une valeur d'entrée ou de sortie du test diffère de celle du scénario (inventée, arrondie, modifiée)"
+    },
+    {
+      "id": "FM-10",
+      "severity": "high",
+      "description": "Écrit le test de plus d'un scénario, ou neutralise un test (Skip, Ignore)"
+    },
+    {
+      "id": "FM-11",
+      "severity": "high",
+      "description": "Utilise une assertion ou un stub factice (NotImplementedException, Assert.Fail) qui rend le RED vide de sens"
+    },
+    {
+      "id": "FM-12",
+      "severity": "high",
+      "description": "Un critère d'acceptation de ac-draft n'a aucun scénario dans le .feature"
+    },
+    {
+      "id": "FM-13",
+      "severity": "medium",
+      "description": "Le plan d'implémentation ne couvre pas tous les scénarios ou laisse une cellule à décider"
+    },
+    {
+      "id": "FM-14",
+      "severity": "high",
+      "description": "Invente un cas métier absent de l'AC au lieu de l'escalader"
+    },
+    {
+      "id": "FM-15",
+      "severity": "high",
+      "description": "Termine sans les livrables attendus (.feature, test-plan, impl-plan, test d'acceptance)"
+    },
+    {
+      "id": "FM-16",
+      "severity": "high",
+      "description": "Le RED n'est pas prouvé : preuve absente, code de sortie 0, ou échec de compilation"
+    },
+    {
+      "id": "FM-17",
+      "severity": "medium",
+      "description": "S'arrête en « bloqué » pour un artefact manquant qui existe pourtant"
+    },
+    {
+      "id": "FM-18",
+      "severity": "medium",
+      "description": "En mode rework, modifie des artefacts non cités dans les findings"
+    },
+    {
+      "id": "FM-19",
+      "severity": "medium",
+      "description": "Le .feature ne respecte pas le format : nom, structure Gherkin, un tag de type par scénario, au moins un @happy-path"
+    },
+    {
+      "id": "FM-20",
+      "severity": "medium",
+      "description": "Les étapes Given/When/Then contiennent du vocabulaire technique"
+    },
+    {
+      "id": "FM-21",
+      "severity": "high",
+      "description": "Une valeur d'un scénario diffère de celle de l'AC source"
+    },
+    {
+      "id": "FM-22",
+      "severity": "medium",
+      "description": "Les cas limites ou négatifs des exemples de l'AC ne sont pas représentés"
+    },
+    {
+      "id": "FM-23",
+      "severity": "medium",
+      "description": "Une étape est ambiguë ou non implémentable telle quelle"
+    },
+    {
+      "id": "FM-24",
+      "severity": "high",
+      "description": "Un scénario du plan de tests ne cible pas le use case de couche Application nommé dans les contrats"
+    },
+    {
+      "id": "FM-25",
+      "severity": "medium",
+      "description": "Aucun scénario walking skeleton n'est identifié pour un flux"
+    },
+    {
+      "id": "FM-26",
+      "severity": "high",
+      "description": "Un use case nouveau n'a pas de test de couche Application, seulement un test d'intégration"
+    }
+  ],
+  "controls": [
+    {
+      "id": "CTRL-SCOPE-01",
+      "covers": [
+        "FM-04"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ]
+      },
+      "check": {
+        "type": "allow-paths",
+        "patterns": [
+          ".copilot-tracking/skraft-plans/**",
+          "tests/**",
+          "src/**"
+        ]
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "Écriture hors des zones de l'agent.",
+        "expected": "Uniquement .copilot-tracking/skraft-plans/, tests/ et src/.",
+        "action": "Écris ce livrable dans sa zone déclarée, ou signale le besoin dans ton rapport."
+      }
+    },
+    {
+      "id": "CTRL-TEST-01",
+      "covers": [
+        "FM-02"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          "tests/**"
+        ]
+      },
+      "check": {
+        "type": "allow-paths",
+        "patterns": [
+          "tests/**/*AcceptanceTests.cs"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Fichier de test autre que le test d'acceptance.",
+        "expected": "Sous tests/, seul le fichier {basename} d'acceptance (*AcceptanceTests.cs) est de ton ressort.",
+        "action": "Les tests unitaires internes appartiennent au software-engineer ; planifie-les dans le test-plan."
+      }
+    },
+    {
+      "id": "CTRL-UPSTREAM-01",
+      "covers": [
+        "FM-03"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ]
+      },
+      "check": {
+        "type": "deny-path",
+        "patterns": [
+          ".copilot-tracking/skraft-plans/*/plans/**",
+          ".copilot-tracking/skraft-plans/*/details/*/contracts-*.md",
+          ".copilot-tracking/skraft-plans/*/details/*/event-model-*.md",
+          ".copilot-tracking/skraft-plans/*/research/**",
+          "docs/adr/**"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Modification d'un artefact des phases DISCUSS ou DESIGN.",
+        "expected": "Les artefacts amont sont en lecture seule.",
+        "action": "Signale le problème (RECONCILIATION NEEDED ou escalade vers DISCUSS) et arrête-toi."
+      }
+    },
+    {
+      "id": "CTRL-TEST-02",
+      "covers": [
+        "FM-05"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          "tests/**/*AcceptanceTests.cs"
+        ]
+      },
+      "check": {
+        "type": "allow-paths",
+        "patterns": [
+          "tests/*.UnitTest/**"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Test d'acceptance hors du projet UnitTest.",
+        "expected": "Le test d'acceptance externe vit sous tests/{Context}.UnitTest/ (couche Application).",
+        "action": "Déplace-le sous tests/*.UnitTest/ ; les tests HTTP ou d'intégration viennent après, côté software-engineer."
+      }
+    },
+    {
+      "id": "CTRL-MD-01",
+      "covers": [
+        "FM-06"
+      ],
+      "event": "PostToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          ".copilot-tracking/skraft-plans/**/*.md"
+        ]
+      },
+      "check": {
+        "type": "content",
+        "require": [
+          "markdownlint-disable-file"
+        ]
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "En-tête Markdown manquant.",
+        "expected": "La première ligne : <!-- markdownlint-disable-file -->",
+        "action": "Ajoute l'en-tête en tête du fichier."
+      }
+    },
+    {
+      "id": "CTRL-SHELL-01",
+      "covers": [
+        "FM-07"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "shell.exec"
+        ]
+      },
+      "check": {
+        "type": "deny-command",
+        "patterns": [
+          "(?i)\\bgit\\s+(commit|push|merge|rebase|restore|stash)\\b",
+          "(?i)\\bgit\\s+reset\\s+--hard\\b",
+          "(?i)\\bgit\\s+clean\\b",
+          "(?i)\\bgit\\s+checkout\\s+(--\\s|\\.)",
+          "(?i)\\brm\\s+-[a-z]*(rf|fr)[a-z]*\\b",
+          "(?i)\\bRemove-Item\\b[^\\n]*-Recurse",
+          "(?i)\\b(rmdir|rd)\\s+/s\\b"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Commande Git d'écriture ou suppression récursive.",
+        "expected": "Git en lecture seule (status, diff, rev-parse) ; aucune suppression en masse.",
+        "action": "Le commit relève de l'orchestrateur ; poursuis sans cette commande."
+      }
+    },
+    {
+      "id": "CTRL-SHELL-02",
+      "covers": [
+        "FM-08"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "shell.exec"
+        ]
+      },
+      "check": {
+        "type": "deny-command",
+        "patterns": [
+          "(?i)\\bdotnet\\s+add\\b[^\\n]*\\bpackage\\b",
+          "(?i)\\b(npm|pnpm|yarn)\\s+(install|i|add)\\b",
+          "(?i)\\bnuget\\s+install\\b"
+        ]
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "Ajout de dépendance.",
+        "expected": "Aucune nouvelle dépendance en phase DISTILL.",
+        "action": "Signale la dépendance nécessaire dans le plan d'implémentation."
+      }
+    },
+    {
+      "id": "CTRL-TEST-03",
+      "covers": [
+        "FM-10"
+      ],
+      "event": "PostToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          "tests/**/*AcceptanceTests.cs"
+        ]
+      },
+      "check": {
+        "type": "content",
+        "forbid": [
+          "\\bSkip\\s*=",
+          "\\[\\s*Ignore\\b"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Test neutralisé.",
+        "expected": "Aucun test marqué Skip ou Ignore ; les scénarios suivants restent dans le .feature et l'impl-plan.",
+        "action": "Retire le test neutralisé ; n'écris que le premier scénario."
+      }
+    },
+    {
+      "id": "CTRL-TEST-04",
+      "covers": [
+        "FM-11"
+      ],
+      "event": "PostToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          "tests/**/*AcceptanceTests.cs",
+          "src/**/*.cs"
+        ]
+      },
+      "check": {
+        "type": "content",
+        "forbid": [
+          "NotImplementedException",
+          "\\bAssert\\.Fail\\(",
+          "\\bAssert\\.(True|False)\\(\\s*(true|false)\\s*\\)"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Assertion ou stub factice.",
+        "expected": "Le test échoue sur une assertion métier ; les stubs compilent sans lever d'exception (règle C5).",
+        "action": "Fais retourner au stub une valeur neutre et laisse l'assertion métier échouer."
+      }
+    },
+    {
+      "id": "CTRL-FEAT-01",
+      "covers": [
+        "FM-20"
+      ],
+      "event": "PostToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature"
+        ]
+      },
+      "check": {
+        "type": "content",
+        "forbid": [
+          "(?im)^\\s*(Given|When|Then|And|But)\\b.*\\b(API|JSON|HTTP|endpoint|SQL|database|null|repository|controller|DTO)\\b"
+        ]
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "Vocabulaire technique dans une étape.",
+        "expected": "Given/When/Then en vocabulaire métier uniquement.",
+        "action": "Reformule l'étape avec les mots du métier."
+      }
+    },
+    {
+      "id": "CTRL-FEAT-02",
+      "covers": [
+        "FM-19"
+      ],
+      "event": "PostToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature"
+        ]
+      },
+      "check": {
+        "type": "custom",
+        "module": "checks/gherkin-format.mjs"
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "Format du .feature non conforme.",
+        "expected": "Feature, scénarios avec When et Then, un tag de type par scénario, au moins un @happy-path.",
+        "action": "Corrige les points listés."
+      }
+    },
+    {
+      "id": "CTRL-FEAT-03",
+      "covers": [
+        "FM-19"
+      ],
+      "event": "PreToolUse",
+      "match": {
+        "tools": [
+          "file.write"
+        ],
+        "paths": [
+          "**/*.feature"
+        ]
+      },
+      "check": {
+        "type": "allow-paths",
+        "patterns": [
+          ".copilot-tracking/skraft-plans/*/features/*-*.feature"
+        ]
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "Nom ou emplacement du .feature non conforme.",
+        "expected": ".copilot-tracking/skraft-plans/{projectSlug}/features/{bounded-context}-{feature}.feature",
+        "action": "Renomme ou déplace le fichier."
+      }
+    },
+    {
+      "id": "CTRL-VAL-01",
+      "covers": [
+        "FM-09"
+      ],
+      "event": "SubagentStop",
+      "match": {
+        "paths": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature",
+          "tests/**/*AcceptanceTests.cs"
+        ]
+      },
+      "check": {
+        "type": "custom",
+        "module": "checks/feature-values.mjs"
+      },
+      "on_error": "allow",
+      "message": {
+        "problem": "Valeurs du premier scénario absentes du test d'acceptance.",
+        "expected": "Chaque valeur du scénario copiée à l'identique dans le test.",
+        "action": "Recopie les valeurs du .feature, sans arrondi ni modification."
+      }
+    },
+    {
+      "id": "CTRL-DONE-01",
+      "covers": [
+        "FM-15"
+      ],
+      "event": "SubagentStop",
+      "match": {},
+      "check": {
+        "type": "require-changed",
+        "scope": "present",
+        "patterns": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature",
+          ".copilot-tracking/skraft-plans/*/details/*/test-plan-*.md",
+          ".copilot-tracking/skraft-plans/*/details/*/impl-plan-*.md",
+          "tests/**/*AcceptanceTests.cs"
+        ]
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Livrables manquants.",
+        "expected": ".feature, test-plan, impl-plan et test d'acceptance.",
+        "action": "Produis les livrables manquants, ou termine par un blocker structuré si c'est impossible."
+      }
+    },
+    {
+      "id": "CTRL-RED-01",
+      "covers": [
+        "FM-16"
+      ],
+      "event": "SubagentStop",
+      "match": {
+        "paths": [
+          "tests/**/*AcceptanceTests.cs",
+          ".copilot-tracking/skraft-plans/*/evidence/**"
+        ]
+      },
+      "check": {
+        "type": "custom",
+        "module": "checks/red-proof.mjs"
+      },
+      "on_error": "block",
+      "message": {
+        "problem": "Preuve RED absente ou invalide.",
+        "expected": "acceptance-red.stdout, .exit (non nul) et .rev écrits après l'exécution filtrée du test, échec sur assertion métier.",
+        "action": "Relance le test filtré et capture sa sortie, son code de sortie et la révision Git."
+      }
+    }
+  ],
+  "blocked_exit": {
+    "require_no_changes": true,
+    "patterns": [
+      "\"status\"\\s*:\\s*\"blocked\"",
+      "(?m)^RECONCILIATION NEEDED"
+    ],
+    "check": {
+      "module": "checks/blocked-justified.mjs",
+      "covers": [
+        "FM-17"
+      ]
+    }
+  },
+  "modes": [
+    {
+      "name": "rework",
+      "task_pattern": "(?im)^\\W*(handoff\\s+)?mode\\W*[:=]?\\s*\\W*rework\\b",
+      "disable": []
+    }
+  ],
+  "report": {
+    "path": "reports/agent-controls/{agent}/{date}-{run}.json"
+  },
+  "reviewer": {
+    "model": {
+      "claude": "opus"
+    },
+    "tools": [
+      "file.read"
+    ],
+    "timeout_ms": 180000,
+    "inputs": [
+      "task",
+      "diff",
+      "artifacts"
+    ],
+    "block_on": [
+      "blocker",
+      "high",
+      "medium"
+    ],
+    "on_inconclusive": "escalate",
+    "lenses": [
+      {
+        "name": "coverage",
+        "inputs": [
+          "artifacts"
+        ],
+        "context": [
+          ".copilot-tracking/skraft-plans/*/plans/*/ac-draft-*.md",
+          ".copilot-tracking/skraft-plans/*/features/*.feature",
+          ".copilot-tracking/skraft-plans/*/details/*/test-plan-*.md"
+        ]
+      },
+      {
+        "name": "business-language",
+        "inputs": [],
+        "context": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature",
+          ".copilot-tracking/skraft-plans/*/plans/*/stories-*.md"
+        ]
+      },
+      {
+        "name": "testability",
+        "inputs": [
+          "diff",
+          "artifacts"
+        ],
+        "access": "project",
+        "context": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature",
+          ".copilot-tracking/skraft-plans/*/details/*/test-plan-*.md",
+          ".copilot-tracking/skraft-plans/*/details/*/impl-plan-*.md",
+          "tests/*.UnitTest/**/*Tests.cs",
+          ".copilot-tracking/skraft-plans/*/evidence/*/*/acceptance-red.*"
+        ]
+      },
+      {
+        "name": "boundaries",
+        "inputs": [],
+        "context": [
+          ".copilot-tracking/skraft-plans/*/features/*.feature",
+          ".copilot-tracking/skraft-plans/*/details/*/test-plan-*.md",
+          ".copilot-tracking/skraft-plans/*/details/*/contracts-*.md"
+        ]
+      },
+      {
+        "name": "rework-scope",
+        "inputs": [
+          "task",
+          "diff"
+        ]
+      }
+    ],
+    "criteria": [
+      {
+        "id": "C4",
+        "lens": "coverage",
+        "severity": "blocker",
+        "covers": [
+          "FM-12"
+        ],
+        "question": "Chaque critère d'acceptation de ac-draft a-t-il au moins un scénario dans le .feature ?"
+      },
+      {
+        "id": "C9",
+        "lens": "coverage",
+        "severity": "blocker",
+        "covers": [
+          "FM-21"
+        ],
+        "question": "Chaque valeur d'entrée et de sortie des scénarios est-elle identique à celle de l'AC source ?"
+      },
+      {
+        "id": "C10",
+        "lens": "coverage",
+        "severity": "high",
+        "covers": [
+          "FM-22"
+        ],
+        "question": "Les cas limites et négatifs présents dans les exemples de l'AC sont-ils tous représentés par un scénario ?"
+      },
+      {
+        "id": "C6",
+        "lens": "coverage",
+        "severity": "blocker",
+        "covers": [
+          "FM-14"
+        ],
+        "question": "Chaque scénario et chaque ligne du plan de tests se rattachent-ils à un AC, sans cas métier inventé ?"
+      },
+      {
+        "id": "C11",
+        "lens": "business-language",
+        "severity": "high",
+        "covers": [
+          "FM-20"
+        ],
+        "question": "Tous les termes des étapes appartiennent-ils au vocabulaire métier des stories, sans nom de classe, de méthode, de framework ni détail d'infrastructure ?"
+      },
+      {
+        "id": "C1",
+        "lens": "testability",
+        "severity": "high",
+        "covers": [
+          "FM-01"
+        ],
+        "question": "Le code ajouté ou modifié sous src/ se limite-t-il à des signatures (types, méthodes, propriétés) sans logique métier ?"
+      },
+      {
+        "id": "C2",
+        "lens": "testability",
+        "severity": "blocker",
+        "covers": [
+          "FM-09"
+        ],
+        "question": "Chaque valeur d'entrée et de sortie du test d'acceptance est-elle identique, caractère pour caractère, à celle du scénario correspondant du .feature ?"
+      },
+      {
+        "id": "C3",
+        "lens": "testability",
+        "severity": "high",
+        "covers": [
+          "FM-10"
+        ],
+        "question": "Le fichier de test d'acceptance ne contient-il qu'un test exécutable, celui du premier scénario du .feature ?"
+      },
+      {
+        "id": "C5",
+        "lens": "testability",
+        "severity": "high",
+        "covers": [
+          "FM-13"
+        ],
+        "question": "Le plan d'implémentation couvre-t-il tous les scénarios du .feature, chaque étape nommant scénario, fichier, test et use case, sans décision laissée ouverte ?"
+      },
+      {
+        "id": "C7",
+        "lens": "testability",
+        "severity": "blocker",
+        "covers": [
+          "FM-16"
+        ],
+        "question": "La preuve RED montre-t-elle un échec sur une assertion métier, et non une erreur de compilation, de configuration ou une exception ?"
+      },
+      {
+        "id": "C12",
+        "lens": "testability",
+        "severity": "high",
+        "covers": [
+          "FM-23"
+        ],
+        "question": "Chaque étape du .feature est-elle non ambiguë et implémentable indépendamment ?"
+      },
+      {
+        "id": "C13",
+        "lens": "testability",
+        "severity": "blocker",
+        "covers": [
+          "FM-26"
+        ],
+        "question": "Pour chaque use case marqué nouveau dans le plan de tests, existe-t-il un fichier de test de couche Application sous tests/*.UnitTest/ ?"
+      },
+      {
+        "id": "C14",
+        "lens": "boundaries",
+        "severity": "blocker",
+        "covers": [
+          "FM-24"
+        ],
+        "question": "Chaque scénario du plan de tests cible-t-il le use case de couche Application nommé dans les contrats ?"
+      },
+      {
+        "id": "C15",
+        "lens": "boundaries",
+        "severity": "high",
+        "covers": [
+          "FM-25"
+        ],
+        "question": "Au moins un scénario walking skeleton est-il identifié par flux dans le plan de tests ?"
+      },
+      {
+        "id": "C8",
+        "lens": "rework-scope",
+        "severity": "medium",
+        "only_in_modes": [
+          "rework"
+        ],
+        "covers": [
+          "FM-18"
+        ],
+        "question": "Les fichiers modifiés se limitent-ils aux artefacts et au test cités dans les findings de la revue ?"
+      }
+    ]
+  }
+}

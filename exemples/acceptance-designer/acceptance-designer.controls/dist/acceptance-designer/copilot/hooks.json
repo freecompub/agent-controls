@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "node \"${PLUGIN_ROOT}/runtime/dispatch.mjs\" copilot PreToolUse",
+        "timeoutSec": 15,
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|apply_patch|str_replace_editor|Bash|KillShell|powershell|mcp__.*|Task|Agent"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "node \"${PLUGIN_ROOT}/runtime/dispatch.mjs\" copilot PostToolUse",
+        "timeoutSec": 5,
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|apply_patch|str_replace_editor|Task|Agent"
+      }
+    ],
+    "SubagentStop": [
+      {
+        "type": "command",
+        "command": "node \"${PLUGIN_ROOT}/runtime/dispatch.mjs\" copilot SubagentStop",
+        "timeoutSec": 210
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node \"${PLUGIN_ROOT}/runtime/dispatch.mjs\" copilot Stop",
+        "timeoutSec": 5
+      }
+    ]
+  }
+}

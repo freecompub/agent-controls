@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/runtime/dispatch.mjs\" claude PreToolUse",
+            "timeout": 15
+          }
+        ],
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|KillShell|mcp__.*|Task|Agent"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/runtime/dispatch.mjs\" claude PostToolUse",
+            "timeout": 5
+          }
+        ],
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Task|Agent"
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/runtime/dispatch.mjs\" claude SubagentStop",
+            "timeout": 210
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/runtime/dispatch.mjs\" claude Stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

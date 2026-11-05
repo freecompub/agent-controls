@@ -1,0 +1,9 @@
+{
+ "event": "PreToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": "tests/Insurance.UnitTest/Domain/PricingPolicyTests.cs",
+  "content": "x"
+ }
+}

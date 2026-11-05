@@ -1,0 +1,9 @@
+{
+ "event": "PreToolUse",
+ "agent": "acceptance-designer",
+ "tool": "file.write",
+ "input": {
+  "path": ".copilot-tracking/skraft-plans/insurance/features/pricing.feature",
+  "content": "Feature: Motorcycle insurance eligibility\n\n  @happy-path\n  Scenario: Young rider gets a motorcycle quote\n    Given a rider aged 25\n    When the rider requests a quote for a \"motorcycle\"\n    Then the quote is accepted with a premium of 480.50\n\n  @error-case\n  Scenario: Under-age rider is refused\n    Given a rider aged 21\n    When the rider requests a quote for a \"motorcycle\"\n    Then the quote is refused with reason \"MINIMUM_AGE\"\n"
+ }
+}

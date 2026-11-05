@@ -1,0 +1,1072 @@
+{
+  "version": 1,
+  "at": "2026-11-05T10:23:15.339Z",
+  "plugin": "acceptance-designer",
+  "plugin_version": "0.5.0",
+  "plugin_digest": "badefc4ee418d44c77c04192211405378b4c7d89e4dcc1326b9868495e81e122",
+  "samples": 5,
+  "live": false,
+  "passed": true,
+  "results": [
+    {
+      "client": "claude",
+      "owner": "CTRL-SCOPE-01",
+      "fixture": "deny-outside",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 38
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SCOPE-01",
+      "fixture": "deny-outside (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 32
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SCOPE-01",
+      "fixture": "allow-plan",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-01",
+      "fixture": "deny-unit-test",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-01",
+      "fixture": "deny-unit-test (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 32
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-01",
+      "fixture": "allow-acceptance",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-UPSTREAM-01",
+      "fixture": "deny-ac-draft",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-UPSTREAM-01",
+      "fixture": "deny-ac-draft (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-UPSTREAM-01",
+      "fixture": "allow-test-plan",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-02",
+      "fixture": "deny-integration",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-02",
+      "fixture": "deny-integration (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 32
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-02",
+      "fixture": "allow-unit",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-MD-01",
+      "fixture": "block-no-header",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-MD-01",
+      "fixture": "block-no-header (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-MD-01",
+      "fixture": "allow-header",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SHELL-01",
+      "fixture": "deny-commit",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 52
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SHELL-01",
+      "fixture": "deny-commit (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SHELL-01",
+      "fixture": "allow-rev-parse",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SHELL-02",
+      "fixture": "deny-package",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SHELL-02",
+      "fixture": "deny-package (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-SHELL-02",
+      "fixture": "allow-test-run",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-03",
+      "fixture": "block-skip",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 38
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-03",
+      "fixture": "block-skip (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-03",
+      "fixture": "allow-active",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 39
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-04",
+      "fixture": "block-not-implemented",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-04",
+      "fixture": "block-not-implemented (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-TEST-04",
+      "fixture": "allow-neutral-stub",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-01",
+      "fixture": "block-technical",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-01",
+      "fixture": "block-technical (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 32
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-01",
+      "fixture": "allow-business",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-02",
+      "fixture": "block-no-tag",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 39
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-02",
+      "fixture": "block-no-tag (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-02",
+      "fixture": "allow-conform",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 38
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-03",
+      "fixture": "deny-bad-name",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-03",
+      "fixture": "deny-bad-name (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-FEAT-03",
+      "fixture": "allow-good-name",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-VAL-01",
+      "fixture": "block-rounded",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 53
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-VAL-01",
+      "fixture": "allow-verbatim",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 53
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-DONE-01",
+      "fixture": "block-no-impl-plan",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 55
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-DONE-01",
+      "fixture": "allow-complete",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 54
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-RED-01",
+      "fixture": "block-exit-zero",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 52
+    },
+    {
+      "client": "claude",
+      "owner": "CTRL-RED-01",
+      "fixture": "allow-red",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 55
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "block-invented-case",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "allow-all-yes",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "rework-c8-active",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "inconclusive-escalates",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "live-good",
+      "expect": "allow",
+      "got": "live",
+      "ok": true,
+      "skipped": true
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "live-value-drift",
+      "expect": "block",
+      "got": "live",
+      "ok": true,
+      "skipped": true
+    },
+    {
+      "client": "claude",
+      "owner": "reviewer",
+      "fixture": "live-wrong-use-case",
+      "expect": "block",
+      "got": "live",
+      "ok": true,
+      "skipped": true
+    },
+    {
+      "client": "claude",
+      "owner": "blocked_exit",
+      "fixture": "block-artefact-present",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 45
+    },
+    {
+      "client": "claude",
+      "owner": "blocked_exit",
+      "fixture": "allow-artefact-absent",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 46
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SCOPE-01",
+      "fixture": "deny-outside",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SCOPE-01",
+      "fixture": "deny-outside (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SCOPE-01",
+      "fixture": "allow-plan",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-01",
+      "fixture": "deny-unit-test",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-01",
+      "fixture": "deny-unit-test (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 32
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-01",
+      "fixture": "allow-acceptance",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-UPSTREAM-01",
+      "fixture": "deny-ac-draft",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-UPSTREAM-01",
+      "fixture": "deny-ac-draft (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-UPSTREAM-01",
+      "fixture": "allow-test-plan",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-02",
+      "fixture": "deny-integration",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-02",
+      "fixture": "deny-integration (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-02",
+      "fixture": "allow-unit",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-MD-01",
+      "fixture": "block-no-header",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "note": "signalé (Copilot ne bloque pas en PostToolUse)",
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-MD-01",
+      "fixture": "block-no-header (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-MD-01",
+      "fixture": "allow-header",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SHELL-01",
+      "fixture": "deny-commit",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SHELL-01",
+      "fixture": "deny-commit (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SHELL-01",
+      "fixture": "allow-rev-parse",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SHELL-02",
+      "fixture": "deny-package",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SHELL-02",
+      "fixture": "deny-package (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-SHELL-02",
+      "fixture": "allow-test-run",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 35
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-03",
+      "fixture": "block-skip",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "note": "signalé (Copilot ne bloque pas en PostToolUse)",
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-03",
+      "fixture": "block-skip (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-03",
+      "fixture": "allow-active",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-04",
+      "fixture": "block-not-implemented",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "note": "signalé (Copilot ne bloque pas en PostToolUse)",
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-04",
+      "fixture": "block-not-implemented (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-TEST-04",
+      "fixture": "allow-neutral-stub",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-01",
+      "fixture": "block-technical",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "note": "signalé (Copilot ne bloque pas en PostToolUse)",
+      "ms": 40
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-01",
+      "fixture": "block-technical (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-01",
+      "fixture": "allow-business",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-02",
+      "fixture": "block-no-tag",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "note": "signalé (Copilot ne bloque pas en PostToolUse)",
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-02",
+      "fixture": "block-no-tag (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 34
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-02",
+      "fixture": "allow-conform",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-03",
+      "fixture": "deny-bad-name",
+      "expect": "deny",
+      "got": "deny",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-03",
+      "fixture": "deny-bad-name (autre agent)",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-FEAT-03",
+      "fixture": "allow-good-name",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-VAL-01",
+      "fixture": "block-rounded",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 53
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-VAL-01",
+      "fixture": "allow-verbatim",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "note": "signal transmis au parent (modifiedResponse)",
+      "ms": 60
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-DONE-01",
+      "fixture": "block-no-impl-plan",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 53
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-DONE-01",
+      "fixture": "allow-complete",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "note": "signal transmis au parent (modifiedResponse)",
+      "ms": 55
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-RED-01",
+      "fixture": "block-exit-zero",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 54
+    },
+    {
+      "client": "copilot",
+      "owner": "CTRL-RED-01",
+      "fixture": "allow-red",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "note": "signal transmis au parent (modifiedResponse)",
+      "ms": 55
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "block-invented-case",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "allow-all-yes",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 33
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "rework-c8-active",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 36
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "inconclusive-escalates",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 37
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "live-good",
+      "expect": "allow",
+      "got": "live",
+      "ok": true,
+      "skipped": true
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "live-value-drift",
+      "expect": "block",
+      "got": "live",
+      "ok": true,
+      "skipped": true
+    },
+    {
+      "client": "copilot",
+      "owner": "reviewer",
+      "fixture": "live-wrong-use-case",
+      "expect": "block",
+      "got": "live",
+      "ok": true,
+      "skipped": true
+    },
+    {
+      "client": "copilot",
+      "owner": "blocked_exit",
+      "fixture": "block-artefact-present",
+      "expect": "block",
+      "got": "block",
+      "ok": true,
+      "problems": [],
+      "ms": 58
+    },
+    {
+      "client": "copilot",
+      "owner": "blocked_exit",
+      "fixture": "allow-artefact-absent",
+      "expect": "allow",
+      "got": "allow",
+      "ok": true,
+      "problems": [],
+      "ms": 49
+    }
+  ],
+  "latency": [
+    {
+      "client": "claude",
+      "event": "PreToolUse",
+      "n": 70,
+      "p50": 35,
+      "p95": 48,
+      "budget": 150,
+      "ok": true
+    },
+    {
+      "client": "claude",
+      "event": "PostToolUse",
+      "n": 50,
+      "p50": 36,
+      "p95": 41,
+      "budget": 1000,
+      "ok": true
+    },
+    {
+      "client": "copilot",
+      "event": "PreToolUse",
+      "n": 70,
+      "p50": 35,
+      "p95": 38,
+      "budget": 150,
+      "ok": true
+    },
+    {
+      "client": "copilot",
+      "event": "PostToolUse",
+      "n": 50,
+      "p50": 36,
+      "p95": 42,
+      "budget": 1000,
+      "ok": true
+    }
+  ]
+}

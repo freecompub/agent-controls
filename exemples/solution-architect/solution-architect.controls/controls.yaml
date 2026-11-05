@@ -1,0 +1,312 @@
+# Contrôles de l'agent solution-architect (copie locale avec Bash ajouté)
+version: 1
+
+agent:
+  name: solution-architect
+  definition: ../solution-architect.md
+  source_sha256: d997868bca4c7a2c1596497fdf76405b149be0788f4b36e5e1703a222124ba2a
+  clients: [claude-code, copilot-cli]
+
+plugin:
+  version: 0.1.0
+  description: Agent solution-architect avec ses contrôles (hooks + deux reviewers)
+
+runtime:
+  budget_ms: { PreToolUse: 150, PostToolUse: 1000, SubagentStop: 240000 }
+  max_iterations: 3
+
+report:
+  path: reports/agent-controls/{agent}/{date}-{run}.json
+
+uncovered_sources:
+  - { name: architecture-patterns, kind: skill, impact: "règles DDD et Clean Architecture générales (règle de dépendance, invariants entre agrégats, conventions d'interfaces)" }
+  - { name: architecture-decisions, kind: skill, impact: "gabarit d'ADR, règles de ratification et de supersession au-delà de ce que dit le prompt" }
+  - { name: adr-eligibility-gate, kind: skill, impact: "les cinq questions d'éligibilité d'un ADR" }
+  - { name: clean-architecture-<language>, kind: skill, impact: "conventions de couches propres au langage du projet" }
+  - { name: consistency-matrix (asset), kind: document, impact: "table de normalisation des étiquettes : la matrice n'est pas recalculée" }
+
+failure_modes:
+  - { id: FM-01, severity: high, description: "Écrit du code ou des tests (src/, tests/)" }
+  - { id: FM-02, severity: high, description: "Modifie un artefact amont : stories, ac-draft, recherche, structural-scan.json" }
+  - { id: FM-03, severity: high, description: "Modifie un contenu existant de docs/adr/ (ADR, supersessions.md, decisions-index.md) au-delà des lignes de statut" }
+  - { id: FM-04, severity: high, description: "Se ratifie lui-même : nouvel ADR non Proposed, ou bascule de statut sans verdict humain" }
+  - { id: FM-05, severity: medium, description: "Écrit hors de .copilot-tracking/skraft-plans/ et docs/adr/" }
+  - { id: FM-06, severity: low, description: "Markdown sans l'en-tête markdownlint-disable-file" }
+  - { id: FM-07, severity: critical, description: "Lance une commande autre que git commit -s, le rendu artifact.mjs adr ou une lecture Git" }
+  - { id: FM-08, severity: medium, description: "Commit non conforme : sans -s, ou avec Closes #N en phase DESIGN" }
+  - { id: FM-09, severity: high, description: "Écrit un ADR à la main : en-tête YAML absent ou incomplet" }
+  - { id: FM-10, severity: high, description: "Numérote les nouveaux ADR avec un trou ou un doublon" }
+  - { id: FM-11, severity: high, description: "Nomme un ADR hors du format docs/adr/adr-NNN-slug.md" }
+  - { id: FM-12, severity: high, description: "Termine sans event model, diagrammes, contrats, context map ou matrice de cohérence" }
+  - { id: FM-13, severity: high, description: "Produit des artefacts alors qu'un blocker sans résolution humaine existait" }
+  - { id: FM-14, severity: medium, description: "S'arrête en missing_artefact sans raison (artefact présent, ou fichiers déjà écrits)" }
+  - { id: FM-15, severity: high, description: "Matrice non PASS sans fichier de blocker, ou blocker sans matrice en échec" }
+  - { id: FM-16, severity: medium, description: "En mode rework, modifie des artefacts non cités dans les findings" }
+  - { id: FM-17, severity: high, description: "Une story n'a aucun déclencheur (commande ou requête) dans l'event model" }
+  - { id: FM-18, severity: high, description: "Une commande n'a pas d'événement, ou une requête en lève un" }
+  - { id: FM-19, severity: medium, description: "Un événement n'est pas nommé au passé, ou n'est pas levé par une racine d'agrégat" }
+  - { id: FM-20, severity: medium, description: "Un sous-domaine n'est pas classé, ou une relation entre contextes n'a pas de pattern explicite" }
+  - { id: FM-21, severity: high, description: "Une interface de repository est en Infrastructure, ou sa couche diffère entre ADR, diagrammes et contrats" }
+  - { id: FM-22, severity: medium, description: "Un nœud de diagramme ne porte aucune des étiquettes imposées" }
+  - { id: FM-23, severity: high, description: "Un agrégat, un contexte ou un pattern est introduit sans story qui le justifie" }
+  - { id: FM-24, severity: medium, description: "Un composant est créé alors que la recherche indiquait un existant réutilisable" }
+  - { id: FM-25, severity: high, description: "ADR pour un candidat inéligible, ou engagement structurel sans ADR" }
+  - { id: FM-26, severity: high, description: "ADR qui échoue à son contrôle de qualité (décision non unique, sans forces, sans conséquence négative, alternatives de façade)" }
+  - { id: FM-27, severity: high, description: "Pattern complexe ratifié sans force admissible ni alternative sans le pattern" }
+  - { id: FM-28, severity: medium, description: "ADR qui ratifie une convention de base du projet" }
+  - { id: FM-29, severity: high, description: "Supersession incomplète : ligne Supersedes, ligne du registre ou plan non réalisé" }
+  - { id: FM-30, severity: high, description: "Contrat incomplet : commande sans validation, requête sans retour, événement sans payload, interface sans couche" }
+  - { id: FM-31, severity: high, description: "Matrice de cohérence absente, sans ligne consistency-gate, ou qui ne reflète pas les artefacts" }
+
+controls:
+  - id: CTRL-CODE-01
+    covers: [FM-01]
+    event: PreToolUse
+    match: { tools: [file.write] }
+    check: { type: deny-path, patterns: ["src/**", "tests/**"] }
+    on_error: block
+    message: { problem: "Code ou test écrit en phase DESIGN.", expected: "Uniquement des artefacts de conception.", action: "Décris-le dans les contrats ; l'implémentation viendra plus tard." }
+    fixtures:
+      - { name: deny-src, input: fixtures/code-01/deny.json, expect: deny }
+      - { name: allow-design, input: fixtures/code-01/allow.json, expect: allow }
+
+  - id: CTRL-UPSTREAM-01
+    covers: [FM-02]
+    event: PreToolUse
+    match: { tools: [file.write] }
+    check: { type: deny-path, patterns: [".copilot-tracking/skraft-plans/*/plans/**", ".copilot-tracking/skraft-plans/*/research/**", ".copilot-tracking/skraft-plans/*/details/*/structural-scan.json"] }
+    on_error: block
+    message: { problem: "Modification d'un artefact amont.", expected: "Stories, AC, recherche et scan en lecture seule.", action: "Émets un blocker si une entrée est fausse." }
+    fixtures:
+      - { name: deny-stories, input: fixtures/upstream-01/deny.json, expect: deny }
+      - { name: allow-event-model, input: fixtures/upstream-01/allow.json, expect: allow }
+
+  - id: CTRL-SCOPE-01
+    covers: [FM-05]
+    event: PreToolUse
+    match: { tools: [file.write] }
+    check: { type: allow-paths, patterns: [".copilot-tracking/skraft-plans/*/**", "docs/adr/**"] }
+    on_error: allow
+    message: { problem: "Écriture hors des zones de l'agent.", expected: "Uniquement .copilot-tracking/skraft-plans/ et docs/adr/.", action: "Écris ce livrable dans sa zone déclarée." }
+    fixtures:
+      - { name: deny-readme, input: fixtures/scope-01/deny.json, expect: deny }
+      - { name: allow-adr, input: fixtures/scope-01/allow.json, expect: allow }
+
+  - id: CTRL-ADR-01
+    covers: [FM-11]
+    event: PreToolUse
+    match: { tools: [file.write], paths: ["docs/adr/adr-*"] }
+    check: { type: custom, module: checks/adr-rules.mjs, params: { rule: filename } }
+    on_error: allow
+    message: { problem: "Nom d'ADR non conforme.", expected: "docs/adr/adr-NNN-slug.md (trois chiffres, slug en minuscules).", action: "Renomme le fichier." }
+    fixtures:
+      - { name: deny-bad-name, input: fixtures/adr-01/deny.json, expect: deny }
+      - { name: allow-good-name, input: fixtures/adr-01/allow.json, expect: allow }
+
+  - id: CTRL-SHELL-01
+    covers: [FM-07, FM-08]
+    event: PreToolUse
+    match: { tools: [shell.exec] }
+    check:
+      type: allow-command
+      patterns:
+        - '^git\s+commit\s+(-s|--signoff)\b'
+        - '^node\s+"?\$\{?SKRAFT_PLUGIN_ROOT\}?/src/cli/artifact\.mjs"?\s+adr\b'
+        - '^git\s+(status|diff|log|show|rev-parse)\b'
+    on_error: block
+    message: { problem: "Commande non autorisée.", expected: "git commit -s, node …/artifact.mjs adr, ou une lecture Git — une commande par appel.", action: "Utilise une de ces commandes, sans enchaînement." }
+    fixtures:
+      - { name: deny-push, input: fixtures/shell-01/deny.json, expect: deny }
+      - { name: deny-chained, input: fixtures/shell-01/deny-chain.json, expect: deny }
+      - { name: deny-unsigned-commit, input: fixtures/shell-01/deny-unsigned.json, expect: deny }
+      - { name: allow-render, input: fixtures/shell-01/allow.json, expect: allow }
+      - { name: allow-commit, input: fixtures/shell-01/allow-commit.json, expect: allow }
+
+  - id: CTRL-SHELL-02
+    covers: [FM-08]
+    event: PreToolUse
+    match: { tools: [shell.exec] }
+    check: { type: deny-command, patterns: ['(?i)\bcloses\s+#\d+'] }
+    on_error: block
+    message: { problem: "Commit qui clôt un ticket en phase DESIGN.", expected: "Une référence (Refs #N) sans clôture.", action: "Remplace Closes par Refs." }
+    fixtures:
+      - { name: deny-closes, input: fixtures/shell-02/deny.json, expect: deny }
+      - { name: allow-refs, input: fixtures/shell-02/allow.json, expect: allow }
+
+  - id: CTRL-ADR-02
+    covers: [FM-03]
+    event: PostToolUse
+    match: { tools: [file.write], paths: ["docs/adr/**"] }
+    check:
+      type: append-only
+      allow_changed:
+        - '^\s*(status|ratified_by)\s*:'
+        - '^\*\*Status:\*\*'
+        - '^\|\s*\[?ADR-\d{3}'
+    on_error: block
+    message: { problem: "Contenu existant de docs/adr/ modifié.", expected: "docs/adr/ est en ajout seul : nouvel ADR ou nouvelle ligne de registre ; seuls les statuts peuvent changer.", action: "Rétablis le contenu existant ; une supersession passe par un nouvel ADR." }
+    fixtures:
+      - { name: block-body-edit, input: fixtures/adr-02/block.json, expect: block }
+      - { name: allow-appended-row, input: fixtures/adr-02/allow.json, expect: allow }
+
+  - id: CTRL-ADR-03
+    covers: [FM-09]
+    event: PostToolUse
+    match: { tools: [file.write], paths: ["docs/adr/adr-*.md"] }
+    check: { type: custom, module: checks/adr-rules.mjs, params: { rule: header } }
+    on_error: block
+    message: { problem: "ADR sans en-tête de décision complet.", expected: "En-tête YAML adr, title, status, chosen, decision, supersedes, date, ratified_by.", action: "Rends l'ADR avec node …/artifact.mjs adr au lieu de l'écrire à la main." }
+    fixtures:
+      - { name: block-no-header, input: fixtures/adr-03/block.json, expect: block }
+      - { name: allow-rendered, input: fixtures/adr-03/allow.json, expect: allow }
+
+  - id: CTRL-ADR-04
+    covers: [FM-04]
+    event: PostToolUse
+    match: { tools: [file.write], paths: ["docs/adr/adr-*.md"] }
+    check: { type: custom, module: checks/adr-rules.mjs, params: { rule: proposed } }
+    on_error: block
+    message: { problem: "Nouvel ADR déjà ratifié.", expected: "Tout nouvel ADR est écrit « Proposed » ; un humain ratifie.", action: "Remets le statut à Proposed." }
+    fixtures:
+      - { name: block-accepted, input: fixtures/adr-04/block.json, expect: block }
+      - { name: allow-proposed, input: fixtures/adr-04/allow.json, expect: allow }
+
+  - id: CTRL-MD-01
+    covers: [FM-06]
+    event: PostToolUse
+    match: { tools: [file.write], paths: [".copilot-tracking/skraft-plans/*/**/*.md", "docs/adr/*.md"] }
+    check: { type: content, require: ["markdownlint-disable-file"] }
+    on_error: allow
+    message: { problem: "En-tête Markdown manquant.", expected: "<!-- markdownlint-disable-file -->", action: "Ajoute l'en-tête." }
+    fixtures:
+      - { name: block-no-lint-header, input: fixtures/md-01/block.json, expect: block }
+      - { name: allow-lint-header, input: fixtures/md-01/allow.json, expect: allow }
+
+  - id: CTRL-DIAG-01
+    covers: [FM-22]
+    event: PostToolUse
+    match: { tools: [file.write], paths: [".copilot-tracking/skraft-plans/*/details/*/diagrams-*.md"] }
+    check: { type: custom, module: checks/diagram-labels.mjs }
+    on_error: allow
+    message: { problem: "Nœud sans étiquette imposée.", expected: "Chaque nœud porte Command, Query, Aggregate, Aggregate Root, Entity, Value Object, Domain Service, Domain Event, Repository ou Read Model.", action: "Ajoute l'étiquette dans le texte du nœud (Nom: Étiquette)." }
+    fixtures:
+      - { name: block-unlabelled, input: fixtures/diag-01/block.json, expect: block }
+      - { name: allow-labelled, input: fixtures/diag-01/allow.json, expect: allow }
+
+  - id: CTRL-ADR-05
+    covers: [FM-10]
+    event: SubagentStop
+    match: {}
+    check: { type: custom, module: checks/adr-rules.mjs, params: { rule: numbering } }
+    on_error: block
+    message: { problem: "Numérotation des ADR incorrecte.", expected: "Les nouveaux ADR suivent le dernier existant, sans trou ni doublon.", action: "Renumérote les nouveaux ADR (fichier, en-tête, index)." }
+    fixtures:
+      - { name: block-gap, input: fixtures/adr-05/block.json, expect: block }
+      - { name: allow-sequence, input: fixtures/adr-05/allow.json, expect: allow }
+
+  - id: CTRL-DONE-01
+    covers: [FM-12]
+    event: SubagentStop
+    match: {}
+    check:
+      type: require-changed
+      scope: present
+      patterns: [".copilot-tracking/skraft-plans/*/details/*/event-model-*.md", ".copilot-tracking/skraft-plans/*/details/*/diagrams-*.md", ".copilot-tracking/skraft-plans/*/details/*/contracts-*.md", ".copilot-tracking/skraft-plans/*/details/*/context-map.md", ".copilot-tracking/skraft-plans/*/details/*/consistency-matrix-*.md"]
+    on_error: block
+    message: { problem: "Livrables de conception manquants.", expected: "Event model, diagrammes, contrats, context map et matrice de cohérence.", action: "Produis les livrables manquants, ou arrête-toi avec un blocker." }
+    fixtures:
+      - { name: block-no-contracts, input: fixtures/done-01/block.json, expect: block }
+      - { name: allow-complete, input: fixtures/done-01/allow.json, expect: allow }
+
+  - id: CTRL-BLOCK-01
+    covers: [FM-13]
+    event: SubagentStop
+    match: {}
+    check: { type: custom, module: checks/open-blockers.mjs }
+    on_error: block
+    message: { problem: "Travail produit malgré un blocker sans résolution.", expected: "Réémettre le blocker et s'arrêter tant qu'un humain n'a pas répondu.", action: "Annule les artefacts produits et réémets le blocker." }
+    fixtures:
+      - { name: block-produced-despite-blocker, input: fixtures/block-01/block.json, expect: block }
+      - { name: allow-resolved-blocker, input: fixtures/block-01/allow.json, expect: allow }
+
+  - id: CTRL-MATRIX-01
+    covers: [FM-15, FM-31]
+    event: SubagentStop
+    match: {}
+    check: { type: custom, module: checks/matrix-blocker.mjs }
+    on_error: block
+    message: { problem: "Matrice de cohérence et blocker incohérents.", expected: "Ligne consistency-gate présente ; un gate non PASS s'accompagne d'un fichier de blocker, et inversement.", action: "Corrige la matrice ou émets le blocker (phase 9)." }
+    fixtures:
+      - { name: block-fail-without-blocker, input: fixtures/matrix-01/block.json, expect: block }
+      - { name: allow-pass, input: fixtures/matrix-01/allow.json, expect: allow }
+
+  - id: CTRL-SUPERSEDE-01
+    covers: [FM-29]
+    event: SubagentStop
+    match: {}
+    check: { type: custom, module: checks/supersession.mjs }
+    on_error: block
+    message: { problem: "Supersession incomplète.", expected: "Ligne **Supersedes:** dans le nouvel ADR, ligne dans supersessions.md, plan de supersession réalisé.", action: "Complète l'enregistrement aux deux endroits." }
+    fixtures:
+      - { name: block-missing-registry-row, input: fixtures/supersede-01/block.json, expect: block }
+      - { name: allow-both-places, input: fixtures/supersede-01/allow.json, expect: allow }
+
+blocked_exit:
+  patterns: ['"status"\s*:\s*"blocked"', 'decision_drift']
+  require_no_changes: false
+  check:
+    module: checks/blocked-justified.mjs
+    covers: [FM-14]
+    fixtures:
+      - { name: block-missing-but-present, input: fixtures/blocked/block.json, expect: block }
+      - { name: allow-missing-absent, input: fixtures/blocked/allow.json, expect: allow }
+      - { name: allow-drift-with-file, input: fixtures/blocked/allow-drift.json, expect: allow }
+
+modes:
+  - name: rework
+    task_pattern: '(?im)^\W*(handoff\s+)?mode\W*[:=]?\s*\W*rework\b'
+    disable: []
+
+reviewer:
+  model: { claude: opus }
+  tools: [file.read]
+  timeout_ms: 180000
+  inputs: [task, diff, artifacts]
+  block_on: [blocker, high, medium]
+  on_inconclusive: escalate
+  lenses:
+    - name: model
+      inputs: [artifacts]
+      context: [".copilot-tracking/skraft-plans/*/plans/*/stories-*.md", ".copilot-tracking/skraft-plans/*/research/*/*-research.md", ".copilot-tracking/skraft-plans/*/details/*/event-model-*.md", ".copilot-tracking/skraft-plans/*/details/*/diagrams-*.md", ".copilot-tracking/skraft-plans/*/details/*/context-map.md", ".copilot-tracking/skraft-plans/*/details/*/contracts-*.md"]
+    - name: decisions
+      inputs: [task, diff, artifacts]
+      access: project
+      context: ["docs/adr/*.md", ".copilot-tracking/skraft-plans/*/details/*/supersession-plan-*.md", ".copilot-tracking/skraft-plans/*/details/*/consistency-matrix-*.md", ".copilot-tracking/skraft-plans/*/details/*/structural-scan.json", ".copilot-tracking/skraft-plans/*/details/*/diagrams-*.md", ".copilot-tracking/skraft-plans/*/details/*/contracts-*.md", ".copilot-tracking/skraft-plans/*/details/*/event-model-*.md"]
+  criteria:
+    - { id: C1, lens: model, severity: high, covers: [FM-17], question: "Chaque story a-t-elle au moins un déclencheur (commande ou requête) dans l'event model ?" }
+    - { id: C2, lens: model, severity: high, covers: [FM-18], question: "Chaque commande a-t-elle au moins un événement, et aucune requête n'en lève-t-elle ?" }
+    - { id: C3, lens: model, severity: medium, covers: [FM-19], question: "Chaque événement est-il nommé au passé et levé par une racine d'agrégat ?" }
+    - { id: C4, lens: model, severity: medium, covers: [FM-20], question: "Chaque sous-domaine est-il classé Core, Supporting ou Generic, et chaque relation entre contextes a-t-elle un pattern explicite ?" }
+    - { id: C5, lens: model, severity: blocker, covers: [FM-21], question: "Chaque interface de repository est-elle dans le Domain ou l'Application, jamais en Infrastructure, avec la même couche dans les diagrammes et les contrats ?" }
+    - { id: C6, lens: model, severity: high, covers: [FM-23], question: "Chaque agrégat, contexte ou pattern introduit est-il justifié par une story explicite ?" }
+    - { id: C7, lens: model, severity: medium, covers: [FM-24], question: "Pour chaque composant créé, la recherche n'indiquait-elle aucun existant à réutiliser ou étendre ?" }
+    - { id: C8, lens: model, severity: high, covers: [FM-30], question: "Chaque commande a-t-elle ses validations, chaque requête sa forme de retour, chaque événement son payload, chaque interface sa couche ?" }
+    - { id: C9, lens: decisions, severity: blocker, covers: [FM-25], question: "Chaque engagement structurel (diagrammes ou scan) a-t-il un ADR, et chaque ADR de ce run porte-t-il sur un candidat éligible ?" }
+    - { id: C10, lens: decisions, severity: high, covers: [FM-26], question: "Chaque ADR de ce run porte-t-il une seule décision, un contexte avec ses forces, au moins une conséquence négative et des alternatives réellement envisagées ?" }
+    - { id: C11, lens: decisions, severity: high, covers: [FM-27], question: "Chaque ADR adoptant un pattern complexe cite-t-il une force admissible et une alternative sans le pattern ?" }
+    - { id: C12, lens: decisions, severity: medium, covers: [FM-28], question: "Aucun ADR de ce run ne ratifie-t-il une convention de base du projet ?" }
+    - { id: C13, lens: decisions, severity: high, covers: [FM-31], question: "La matrice de cohérence reflète-t-elle les étiquettes réellement présentes dans l'event model, les diagrammes et les contrats ?" }
+    - { id: C14, lens: decisions, severity: blocker, covers: [FM-04], question: "Chaque changement de statut d'un ADR existant correspond-il à un verdict humain présent dans la consigne (ou aucun statut n'a-t-il changé) ?" }
+    - { id: C15, lens: decisions, severity: medium, only_in_modes: [rework], covers: [FM-16], question: "Les fichiers modifiés se limitent-ils aux artefacts cités dans les findings de la revue ?" }
+  fixtures:
+    - { name: allow-all-yes, input: fixtures/reviewer/allow.json, expect: allow }
+    - { name: block-repository-in-infra, input: fixtures/reviewer/block.json, expect: block }
+    - { name: live-good, input: fixtures/reviewer/live-good.json, expect: allow }
+    - { name: live-repository-in-infra, input: fixtures/reviewer/live-infra.json, expect: block }
+    - { name: live-adr-without-negative, input: fixtures/reviewer/live-adr-quality.json, expect: block }
+
+deferred:
+  - { id: DEF-01, covers: [FM-16, FM-04], planned: "Détecter les modes rework et ratification de façon fiable", needs: "un exemple de bloc de handoff pour chaque mode" }
+  - { id: DEF-02, covers: [FM-31], planned: "Recalculer la matrice de cohérence et la comparer à celle de l'agent", needs: "la table de normalisation de l'asset consistency-matrix" }
+  - { id: DEF-03, covers: [FM-21, FM-30], planned: "Vérifier la couche de chaque interface dans les contrats", needs: "un exemple de fichier contracts-{story}.md" }
+  - { id: DEF-04, covers: [FM-12, FM-17], planned: "Exiger les livrables et un déclencheur pour chaque story", needs: "le format des identifiants de story dans stories-{milestone}.md" }

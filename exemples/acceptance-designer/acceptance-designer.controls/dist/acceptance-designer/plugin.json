@@ -1,0 +1,7 @@
+{
+  "name": "acceptance-designer",
+  "version": "0.5.0",
+  "description": "Agent acceptance-designer de Skraft avec ses contrôles (hooks + reviewer)",
+  "agents": "copilot/agents/",
+  "hooks": "copilot/hooks.json"
+}
