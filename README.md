@@ -11,6 +11,21 @@ Skill qui, à partir du fichier `.md` d'un agent, génère un plugin prêt à l'
 | `exemples/acceptance-designer/` | agent Skraft, contrat, modules, fixtures et plugin généré |
 | `exemples/solution-architect/` | idem — copie locale de l'agent avec `Bash` ajouté (oubli de la définition d'origine) |
 
+## Installer ce skill comme plugin
+
+Ce dépôt est lui-même packagé comme plugin compatible Claude Code et GitHub Copilot CLI
+(`.claude-plugin/plugin.json`, `plugin.json`, `.claude-plugin/marketplace.json`).
+
+```bash
+# Claude Code
+/plugin marketplace add freecompub/agent-controls
+/plugin install agent-controls --marketplace freecompub/agent-controls
+
+# GitHub Copilot CLI
+copilot plugin marketplace add freecompub/agent-controls
+copilot plugin install agent-controls@agent-controls-marketplace
+```
+
 ## Utilisation (depuis le dossier qui contient l'agent)
 
 ```bash

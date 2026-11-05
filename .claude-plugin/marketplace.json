@@ -1,0 +1,13 @@
+{
+  "name": "agent-controls-marketplace",
+  "description": "Marketplace freecompub pour le plugin agent-controls (Claude Code et Copilot CLI).",
+  "owner": { "name": "freecompub" },
+  "plugins": [
+    {
+      "name": "agent-controls",
+      "description": "Transforme la définition d'un agent (Claude Code ou GitHub Copilot) en plugin contrôlé : hooks déterministes, reviewer en lecture seule, fixtures de test, manifestes Claude Code et Copilot.",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
+}

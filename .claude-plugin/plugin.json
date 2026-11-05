@@ -1,0 +1,12 @@
+{
+  "name": "agent-controls",
+  "displayName": "Agent Controls",
+  "version": "0.1.0",
+  "description": "Transforme la définition d'un agent (Claude Code ou GitHub Copilot) en plugin contrôlé : hooks déterministes (PreToolUse/PostToolUse/SubagentStop), reviewer en lecture seule, fixtures de test, manifestes Claude Code et Copilot.",
+  "author": { "name": "freecompub" },
+  "homepage": "https://github.com/freecompub/agent-controls",
+  "repository": "https://github.com/freecompub/agent-controls",
+  "license": "MIT",
+  "keywords": ["agents", "guardrails", "hooks", "reviewer", "plugin", "controls"],
+  "skills": ["./agent-controls/"]
+}
